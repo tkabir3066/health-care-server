@@ -12,6 +12,12 @@ interface EnvConfig {
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;
   };
+  JWT: {
+    ACCESS_TOKEN_SECRETS: string;
+    ACCESS_TOKEN_EXPIRES: string;
+    REFRESH_TOKEN_SECRETS: string;
+    REFRESH_TOKEN_EXPIRES: string;
+  };
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -23,6 +29,10 @@ const loadEnvVariables = (): EnvConfig => {
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
+    "ACCESS_TOKEN_SECRETS",
+    "ACCESS_TOKEN_EXPIRES",
+    "REFRESH_TOKEN_SECRETS",
+    "REFRESH_TOKEN_EXPIRES",
   ];
 
   requiredEnvVariables.forEach((key) => {
@@ -40,6 +50,13 @@ const loadEnvVariables = (): EnvConfig => {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
       CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
       CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+    },
+
+    JWT: {
+      ACCESS_TOKEN_SECRETS: process.env.ACCESS_TOKEN_SECRETS as string,
+      ACCESS_TOKEN_EXPIRES: process.env.ACCESS_TOKEN_EXPIRES as string,
+      REFRESH_TOKEN_SECRETS: process.env.REFRESH_TOKEN_SECRETS as string,
+      REFRESH_TOKEN_EXPIRES: process.env.REFRESH_TOKEN_EXPIRES as string,
     },
   };
 };
