@@ -42,10 +42,13 @@ const createDoctor = catchAsync(
 );
 const getAllFromDB = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { limit, page } = req.query;
+    const { limit, page, searchTerm, sortBy, sortOrder } = req.query;
     const result = await UserService.getAllFromDB({
       page: Number(page),
       limit: Number(limit),
+      searchTerm,
+      sortBy,
+      sortOrder,
     });
 
     sendResponse(res, {
