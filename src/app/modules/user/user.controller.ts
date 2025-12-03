@@ -47,8 +47,8 @@ const getAllFromDB = catchAsync(
     // page,limit,sortOrder,sortBy --> pagination, sorting
     //fields, searchTerm --> searching, filtering
 
-    const filters = pick(req.query, userFilterableFields);
-    const options = pick(req.query, ["page", "limit", "sortOrder", "sortBy"]);
+    const filters = pick(req.query, userFilterableFields); //searching, filtering
+    const options = pick(req.query, ["page", "limit", "sortOrder", "sortBy"]); //pagination, sorting
     /*     const { limit, page, searchTerm, sortBy, sortOrder, role, status } =
       req.query;
     const result = await UserService.getAllFromDB({
