@@ -2,6 +2,7 @@ import { addMinutes, addDays } from "date-fns";
 import { prisma } from "../../config/db";
 import { IOptions, PaginationHelper } from "../../helper/paginationHelper";
 import { Prisma } from "@prisma/client";
+import { JwtPayload } from "jsonwebtoken";
 
 const createSchedule = async (payload: any) => {
   // Destructure payload
@@ -75,7 +76,10 @@ const createSchedule = async (payload: any) => {
   return schedules;
 };
 
-const schedulesForDoctor = async (filters: any, options: IOptions) => {
+const schedulesForDoctor = async (
+  filters: any,
+  options: IOptions
+) => {
   const { page, limit, skip, sortBy, sortOrder } =
     PaginationHelper.calculatePagination(options);
 
@@ -111,17 +115,17 @@ const schedulesForDoctor = async (filters: any, options: IOptions) => {
   const result = await prisma.schedule.findMany({
     where: whereConditions,
     skip,
-    take:limit,
-     orderBy: {
+    take: limit,
+    orderBy: {
       [sortBy]: sortOrder,
     },
   });
 
-   const total = await prisma.schedule.count({
+  const total = await prisma.schedule.count({
     where: whereConditions,
   });
 
-    return {
+  return {
     meta: {
       page,
       limit,
@@ -131,7 +135,17 @@ const schedulesForDoctor = async (filters: any, options: IOptions) => {
   };
 };
 
+const deleteScheduleFromDB = async (id: string) => {
+  const result = await prisma.schedule.delete({
+    where:{
+      id
+    }
+  })
+
+  return result;
+};
 export const ScheduleService = {
   createSchedule,
   schedulesForDoctor,
+  deleteScheduleFromDB,
 };

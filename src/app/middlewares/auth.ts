@@ -5,7 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 
 export const auth =
   (...roles: string[]) =>
-  async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.cookies?.accessToken;
 
