@@ -9,7 +9,7 @@ const router = Router();
 
 router.get(
   "/",
-  auth(UserRole.ADMIN, UserRole.DOCTOR),
+  // auth(UserRole.ADMIN, UserRole.DOCTOR),
   UserController.getAllFromDB
 );
 
