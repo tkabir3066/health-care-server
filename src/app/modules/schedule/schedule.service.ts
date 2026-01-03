@@ -3,80 +3,63 @@ import { prisma } from "../../config/db";
 import { IOptions, PaginationHelper } from "../../helper/paginationHelper";
 import { Prisma } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
+import { IJWTPayload } from "../../types/common";
 
-const createSchedule = async (payload: any) => {
-  // Destructure payload
+interface CreateSchedulePayload {
+  startTime: string; // Format: "HH:mm"
+  endTime: string;
+  startDate: string | Date;
+  endDate: string | Date;
+}
+
+const createSchedule = async (payload: CreateSchedulePayload) => {
   const { startTime, endTime, startDate, endDate } = payload;
-  const intervalTime = 30; // 30-minute slots
-  const schedules: any[] = [];
+  const intervalTime = 30;
+  const schedulesToCreate: any[] = [];
 
-  // Parse start and end dates
   const currentDate = new Date(startDate);
   const lastDate = new Date(endDate);
 
-  console.log({ startDate, endDate, startTime, endTime });
-
-  // Loop over each day from startDate to endDate (inclusive)
   while (currentDate <= lastDate) {
-    // Extract year, month, day from currentDate
     const year = currentDate.getFullYear();
-    const month = currentDate.getMonth(); // 0-based
+    const month = currentDate.getMonth();
     const day = currentDate.getDate();
 
-    // Parse startTime "HH:mm"
-    const [startHourStr, startMinuteStr] = startTime.split(":");
-    const startHour = parseInt(startHourStr, 10);
-    const startMinute = parseInt(startMinuteStr, 10);
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
 
-    // Parse endTime "HH:mm"
-    const [endHourStr, endMinuteStr] = endTime.split(":");
-    const endHour = parseInt(endHourStr, 10);
-    const endMinute = parseInt(endMinuteStr, 10);
-
-    // Create start and end Date objects for this day
     const dayStartDateTime = new Date(year, month, day, startHour, startMinute);
     const dayEndDateTime = new Date(year, month, day, endHour, endMinute);
 
-    // Start from dayStartDateTime and create slots until dayEndDateTime
-    let slotStart = new Date(dayStartDateTime); // Copy to avoid mutating original
+    let slotStart = new Date(dayStartDateTime);
 
     while (slotStart < dayEndDateTime) {
-      // Calculate slot end time (start + 30 minutes)
       const slotEnd = addMinutes(slotStart, intervalTime);
 
-      // Only create slot if it ends by or before dayEndDateTime
       if (slotEnd <= dayEndDateTime) {
-        const scheduleData = {
-          startDateTime: slotStart,
-          endDateTime: slotEnd,
-        };
-
-        // Check if this exact slot already exists
-        const existingSchedule = await prisma.schedule.findFirst({
-          where: scheduleData,
+        schedulesToCreate.push({
+          startDateTime: new Date(slotStart),
+          endDateTime: new Date(slotEnd),
         });
-
-        // Create only if not already present
-        if (!existingSchedule) {
-          const result = await prisma.schedule.create({
-            data: scheduleData,
-          });
-          schedules.push(result);
-        }
       }
 
-      // Move to next slot: advance slotStart by 30 minutes
       slotStart = addMinutes(slotStart, intervalTime);
     }
 
-    // Move to next day
     currentDate.setTime(addDays(currentDate, 1).getTime());
   }
 
-  return schedules;
+  // Single bulk insert with automatic duplicate handling
+  const result = await prisma.schedule.createMany({
+    data: schedulesToCreate,
+    skipDuplicates: true, // Prevents errors on duplicate entries
+  });
+
+  return result;
 };
 
 const schedulesForDoctor = async (
+  user: IJWTPayload,
   filters: any,
   options: IOptions
 ) => {
@@ -112,8 +95,28 @@ const schedulesForDoctor = async (
         }
       : {};
 
+  const doctorSchedules = await prisma.doctorSchedules.findMany({
+    where: {
+      doctor: {
+        email: user.email,
+      },
+    },
+    select: {
+      scheduleId: true,
+    },
+  });
+
+  const doctorScheduleIds = doctorSchedules.map(
+    (schedule) => schedule.scheduleId
+  );
+
   const result = await prisma.schedule.findMany({
-    where: whereConditions,
+    where: {
+      ...whereConditions,
+      id: {
+        notIn: doctorScheduleIds,
+      },
+    },
     skip,
     take: limit,
     orderBy: {
@@ -122,7 +125,12 @@ const schedulesForDoctor = async (
   });
 
   const total = await prisma.schedule.count({
-    where: whereConditions,
+    where: {
+      ...whereConditions,
+      id: {
+        notIn: doctorScheduleIds,
+      },
+    },
   });
 
   return {
@@ -136,14 +144,11 @@ const schedulesForDoctor = async (
 };
 
 const deleteScheduleFromDB = async (id: string) => {
-  const result = await prisma.schedule.delete({
-    where:{
-      id
-    }
-  })
+  const result = await prisma.schedule.deleteMany();
 
   return result;
 };
+
 export const ScheduleService = {
   createSchedule,
   schedulesForDoctor,

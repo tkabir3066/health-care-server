@@ -19,10 +19,10 @@ const moduleRoutes = [
     path: "/schedule",
     route: ScheduleRoutes,
   },
-  // {
-  //   path: "/doctor-schedule",
-  //   route: DoctorScheduleRoutes,
-  // },
+  {
+    path: "/doctor-schedule",
+    route: DoctorScheduleRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => {
