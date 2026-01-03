@@ -8,7 +8,8 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  let statusCode: number = StatusCodes.INTERNAL_SERVER_ERROR;
+  console.log(err);
+  let statusCode: number = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
   let success = false;
   let message = err.message || "Something went wrong!";
   let error = err;

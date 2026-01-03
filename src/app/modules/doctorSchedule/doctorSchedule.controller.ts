@@ -16,17 +16,10 @@ const createDoctorSchedule = catchAsync(
       user as IJWTPayload,
       req.body
     );
-
-    const message =
-      result.newlyCreated > 0
-        ? `${result.newlyCreated} Doctor Schedule(s) created successfully`
-        : "No new schedules were created - all schedules already exist";
-
     sendResponse(res, {
       success: true,
-      statusCode:
-        result.newlyCreated > 0 ? StatusCodes.CREATED : StatusCodes.OK,
-      message,
+      statusCode: StatusCodes.CREATED,
+      message: "Schedule created successfully",
       data: result,
     });
   }
