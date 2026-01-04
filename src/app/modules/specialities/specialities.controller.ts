@@ -22,9 +22,8 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: "Schedule retrieved successfully",
-    meta: result.meta,
-    data: result.data,
+    message: "Specialities retrieved successfully",
+    data: result,
   });
 });
 
@@ -35,8 +34,7 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: "Schedule retrieved successfully",
-    meta: result.meta,
-    data: result.data,
+    data: result,
   });
 });
 
