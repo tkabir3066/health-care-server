@@ -33,7 +33,20 @@ const updateIntoDB = catchAsync(
   }
 );
 
+const getAISuggestion = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await DoctorService.getAISuggestion(req.body);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "AI Suggestion fetched successfully",
+      data: result,
+    });
+  }
+);
+
 export const DoctorController = {
   getAllFromDB,
   updateIntoDB,
+  getAISuggestion,
 };
